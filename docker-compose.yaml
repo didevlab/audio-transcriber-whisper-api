@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  audio_transcriber:
+    image: didevlab/audio-transcriber-whisper-api:1.0.0
+    container_name: audio_transcriber_whisper_api
+    restart: always  # Automatically restarts the container in case of failure
+    environment:
+      - PORT=80
+      - API_WHISPER_URL=whisper_api  # Set to the address of your Whisper service (e.g., 'whisper_api', '192.168...', or a domain)
+      - API_WHISPER_PORT=9000  # Port exposed by the Whisper service
+      - API_WHISPER_TIMEOUT=360000  # Waits up to 6 minutes for a response from Whisper
+    ports:
+      - "5000:80"  # Maps container port 80 to host port 80
+    depends_on:
+      - whisper_api  # Ensures whisper_api starts before this service
+
+  whisper_api:
+    image: onerahmet/openai-whisper-asr-webservice:latest-gpu  # Replace with the actual Whisper image if needed
+          # For GPU-enabled version -> onerahmet/openai-whisper-asr-webservice:latest-gpu
+          # More info -> https://hub.docker.com/r/onerahmet/openai-whisper-asr-webservice
+    container_name: whisper_api
+    restart: always  # Automatically restarts the container in case of failure
+    environment:
+      - ASR_MODEL=turbo  # Sets the default Whisper model to 'turbo' More info -> https://github.com/openai/whisper
+      - ASR_ENGINE=openai_whisper
+      - NVIDIA_VISIBLE_DEVICES=all  # Allows use of all available GPUs if uncommented (for GPU-enabled versions)
+    runtime: nvidia  # Required to enable GPU usage
+    ports:
+      - "9000:9000"  # Exposes Whisper service on port 9000
+    volumes:
+      - whisper_model:/root/.cache/whisper  # Maps host directory to cache Whisper model files
+
+volumes:
+  whisper_model:
+    driver: local  # Uses a local volume to persist the model files
