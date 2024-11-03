@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audio-transcriber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: audio-transcriber
+  template:
+    metadata:
+      labels:
+        app: audio-transcriber
+    spec:
+      containers:
+        - name: audio-transcriber
+          image: didevlab/audio-transcriber-whisper-api:1.0.0
+          ports:
+            - containerPort: 80
+          env:
+            - name: PORT
+              value: "80"
+            - name: API_WHISPER_URL
+              value: "whisper-api"  # Set this to the address of your Whisper service
+            - name: API_WHISPER_PORT
+              value: "9000"
+            - name: API_WHISPER_TIMEOUT
+              value: "360000"
+          # Restart policy is handled automatically by Kubernetes
