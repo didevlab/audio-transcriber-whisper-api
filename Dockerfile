@@ -7,4 +7,4 @@ WORKDIR /opt/app
 
 COPY ./app/ .
 
-ENTRYPOINT ["gunicorn", "-w", "1", "-b", "0.0.0.0:80","main:app","--capture-output"]
+ENTRYPOINT ["gunicorn", "-w", "1", "-b", "0.0.0.0:80","main:app","--timeout", "600","--capture-output"]
